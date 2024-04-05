@@ -13,6 +13,7 @@ const MyPage = () => {
         if (!session || !session.user || !session.user.name) {
             router.push("/");
         }
+        console.log(session?.user);
     }, [session, router]);
 
     const toggleClick = (index: number) => {
