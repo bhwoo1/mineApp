@@ -1,14 +1,11 @@
 "use client"
-import { useSession } from 'next-auth/react';
+import { signIn, useSession } from 'next-auth/react';
 import React, { useState, ChangeEvent, FormEvent, useEffect } from 'react';
 import { useRouter } from "next/navigation";
 import axios from 'axios';
 import { Product } from '../Type';
 
 
-
-  
-  
   const initialProductState: Product = {
     auctionimages: [],
     auctiontitle: '',
@@ -17,29 +14,21 @@ import { Product } from '../Type';
     auctiontime: new Date(),
     auctionendtime: new Date(),
     auctionuser: '',
-    auctioncategory: ''
+    auctioncategory: '',
+    auctiondirectbid: null,
   };
   
   const ProductRegi: React.FC = () => {
     const [product, setProduct] = useState<Product>(initialProductState);
-    const {data: session} = useSession();
-    const router = useRouter();
+    const [isDirectBidSelected, setIsDirectBidSelected] = useState<boolean>(false);
+    const {data: session, status: sessionStatus} = useSession();
 
-  //   useEffect(() => {
-  //     if (!session) {
-  //         router.push("/");
-  //     }
-  //     console.log(session?.user);
-  // }, [session, router]);
-    
-    
-    // const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    //   const { name, value } = e.target;
-    //   setProduct(prevProduct => ({
-    //     ...prevProduct,
-    //     [name]: value
-    //   }));
-    // };
+    useEffect(() => {
+      if (sessionStatus === "loading") return; // 세션 로딩 중일 때는 아무것도 하지 않음
+      if (!session) {
+        signIn("naver", { redirect: true });
+      }
+    }, [session, sessionStatus]);
 
     const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
       const { name, value } = e.target;
@@ -98,6 +87,7 @@ import { Product } from '../Type';
       formData.append('auctioncategory', product.auctioncategory);
       formData.append('auctionprice', String(product.auctionprice));
       formData.append('auctionendtime', String(product.auctionendtime));
+      formData.append('auctiondirectbid', isDirectBidSelected ? String(product.auctiondirectbid) : ''); // 변경된 부분
 
       axios.post("http://localhost:8080/auctionwrite", 
         formData, 
@@ -136,63 +126,59 @@ import { Product } from '../Type';
       }));
     };
 
-    const formatDate = (date: Date) => {
-      const year = date.getFullYear();
-      const month = String(date.getMonth() + 1).padStart(2, '0');
-      const day = String(date.getDate()).padStart(2, '0');
-      const hours = String(date.getHours()).padStart(2, '0');
-      const minutes = String(date.getMinutes()).padStart(2, '0');
-      return `${year}-${month}-${day}T${hours}:${minutes}`;
-    };
-
-
-  
-    // const handleSubmit = (e: FormEvent) => {
-    //   e.preventDefault();
-    //   // 여기서 상품 정보를 처리하거나 서버에 전송할 수 있습니다.
-    //   console.log('Submitted:', product);
-    //   // 이후에 입력된 정보를 초기화하거나 페이지를 이동할 수 있습니다.
-    //   setProduct(initialProductState);
-    // };
   
     return (
       <main className='pt-12 mt-12 mb-36 px-20'>
-        <h2 className="text-3xl font-semibold mb-6">상품 등록</h2>
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="flex flex-col">
-            {/* 이미지 미리보기 */}
-            <div className="flex space-x-4 mt-6">
-              {product.auctionimages.map((image, index) => (
-                <div key={index} className="relative w-32 h-32" onClick={() => handleRemoveImage(index)}>
-                  <img src={URL.createObjectURL(image)} alt={`상품 이미지 ${index + 1}`} className="w-full h-full object-cover rounded-md" />
+        {session ? 
+            <>
+              <h2 className="text-3xl font-semibold mb-6">상품 등록</h2>
+              <form onSubmit={handleSubmit} className="space-y-6">
+                <div className="flex flex-col">
+                  {/* 이미지 미리보기 */}
+                  <div className="flex space-x-4 mt-6">
+                    {product.auctionimages.map((image, index) => (
+                      <div key={index} className="relative w-32 h-32" onClick={() => handleRemoveImage(index)}>
+                        <img src={URL.createObjectURL(image)} alt={`상품 이미지 ${index + 1}`} className="w-full h-full object-cover rounded-md" />
+                      </div>
+                    ))}
+                  </div>
+                  <label htmlFor="image" className="mb-1">상품 사진 (최대 5개):</label>
+                  <input type="file" name="auctionimages" id="image" multiple onChange={handleImageChange} className="border rounded-md py-2 px-3 focus:outline-none focus:ring focus:border-blue-300" />
                 </div>
-              ))}
+                <div className="flex flex-col">
+                  <label htmlFor="auctiontitle" className="mb-1">상품 이름:</label>
+                  <input type="text" id="auctiontitle" name="auctiontitle" value={product.auctiontitle} onChange={handleChange} className="border rounded-md py-2 px-3 focus:outline-none focus:ring focus:border-blue-300" />
+                </div>
+                <div className="flex flex-col">
+                  <label htmlFor="auctionprice" className="mb-1">경매 시작가:</label>
+                  <input type="number" id="auctionprice" name="auctionprice" value={product.auctionprice} onChange={handleChange} min={1000} step={100} className="border rounded-md py-2 px-3 focus:outline-none focus:ring focus:border-blue-300" />
+                  <p className='pt-4'>최소 금액은 1000원 입니다.</p>
+                </div>
+                <input type="checkbox" id="enableDirectBid" onChange={() => setIsDirectBidSelected(!isDirectBidSelected)} />
+                <label htmlFor="enableDirectBid" className='pl-2'>즉시 입찰가 추가</label>
+                {isDirectBidSelected && 
+                  <div className="flex flex-col">
+                    <label htmlFor="auctiondirectbid" className="mb-1">즉시 입찰가:</label>
+                    <input type="number" id="auctiondirectbid" name="auctiondirectbid" value={product.auctionprice} onChange={handleChange} min={1000} step={100} className="border rounded-md py-2 px-3 focus:outline-none focus:ring focus:border-blue-300" />
+                  </div>
+                }
+                <div className="flex flex-col">
+                  <label htmlFor="endtime" className="mb-1">종료 시간:</label>
+                  <input type="datetime-local" id="auctionendtime" name="auctionendtime"  onChange={handleChange} className="border rounded-md py-2 px-3 focus:outline-none focus:ring focus:border-blue-300" />
+                  <p className='pt-4'>최소 경매 기간은 7일입니다.</p>
+                </div>
+                <div className="flex flex-col">
+                  <label htmlFor="description" className="mb-1">상품 설명:</label>
+                  <textarea id="description" name="auctioncontent" value={product.auctioncontent} onChange={handleChange} className="border rounded-md py-2 px-3 focus:outline-none focus:ring focus:border-blue-300"></textarea>
+                </div>
+                <button type="submit" className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded focus:outline-none focus:ring focus:border-blue-300">등록</button>
+              </form>
+            </>
+          :
+            <div className='flex justify-center items-center'>
+              <p className='font-semibold text-gray-700'>로그인이 필요합니다.</p>
             </div>
-            <label htmlFor="image" className="mb-1">상품 사진 (최대 5개):</label>
-            <input type="file" name="auctionimages" id="image" multiple onChange={handleImageChange} className="border rounded-md py-2 px-3 focus:outline-none focus:ring focus:border-blue-300" />
-          </div>
-          <div className="flex flex-col">
-            <label htmlFor="auctiontitle" className="mb-1">상품 이름:</label>
-            <input type="text" id="auctiontitle" name="auctiontitle" value={product.auctiontitle} onChange={handleChange} className="border rounded-md py-2 px-3 focus:outline-none focus:ring focus:border-blue-300" />
-          </div>
-          <div className="flex flex-col">
-            <label htmlFor="auctionprice" className="mb-1">경매 시작가:</label>
-            <input type="number" id="auctionprice" name="auctionprice" value={product.auctionprice} onChange={handleChange} min={1000} step={100} className="border rounded-md py-2 px-3 focus:outline-none focus:ring focus:border-blue-300" />
-            <p className='pt-4'>최소 금액은 1000원 입니다.</p>
-          </div>
-          <div className="flex flex-col">
-            <label htmlFor="endtime" className="mb-1">종료 시간:</label>
-            <input type="datetime-local" id="auctionendtime" name="auctionendtime"  onChange={handleChange} className="border rounded-md py-2 px-3 focus:outline-none focus:ring focus:border-blue-300" />
-            <p className='pt-4'>최소 경매 기간은 7일입니다.</p>
-          </div>
-          <div className="flex flex-col">
-            <label htmlFor="description" className="mb-1">상품 설명:</label>
-            <textarea id="description" name="auctioncontent" value={product.auctioncontent} onChange={handleChange} className="border rounded-md py-2 px-3 focus:outline-none focus:ring focus:border-blue-300"></textarea>
-          </div>
-          <button type="submit" className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded focus:outline-none focus:ring focus:border-blue-300">등록</button>
-        </form>
-
-        
+        }
       </main>
     );
   }

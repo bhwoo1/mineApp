@@ -7,6 +7,7 @@ export type Product =  {
     auctionendtime: Date;
     auctionuser: string;
     auctioncategory: string;
+    auctiondirectbid: number | null;
   }
 
  export type ProductInfo = {
