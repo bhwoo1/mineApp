@@ -16,21 +16,24 @@ import { Product } from '../Type';
     auctionuser: '',
     auctioncategory: '',
     auctiondirectbid: null,
+    auctionusername: ''
   };
   
   const ProductRegi: React.FC = () => {
     const [product, setProduct] = useState<Product>(initialProductState);
     const [isDirectBidSelected, setIsDirectBidSelected] = useState<boolean>(false);
     const {data: session, status: sessionStatus} = useSession();
+    const router = useRouter();
 
     useEffect(() => {
+      console.log(session?.user.name);
       if (sessionStatus === "loading") return; // 세션 로딩 중일 때는 아무것도 하지 않음
       if (!session) {
         signIn("naver", { redirect: true });
       }
     }, [session, sessionStatus]);
 
-    const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement> ) => {
       const { name, value } = e.target;
       if (name === 'auctionendtime') {
         setProduct(prevProduct => ({
@@ -45,14 +48,31 @@ import { Product } from '../Type';
       }
     };
 
+    const handleSelectChange = (e: ChangeEvent<HTMLSelectElement>) => {
+      const { name, value } = e.target;
+      setProduct(prevProduct => ({
+        ...prevProduct,
+        [name]: value
+      }));
+    };
+
     const handleSubmit = async (e: FormEvent) => {
       e.preventDefault();
-      console.log(product.auctionendtime);
 
       // 이미지가 없을 때 경고 메시지 표시
       if (product.auctionimages.length === 0) {
         alert('이미지를 등록해주세요.');
         return; // 이미지가 없으면 함수 종료
+      }
+
+      if(product.auctiontitle === "") {
+        alert('상품 이름을 등록해주세요.');
+        return;
+      }
+
+      if(product.auctioncategory === "") {
+        alert('카테고리를 선택해주세요.');
+        return;
       }
 
 
@@ -65,6 +85,7 @@ import { Product } from '../Type';
           alert('종료 시간은 현재 시간보다 이후여야 합니다.');
           return; // 종료 시간이 이전일 경우 함수 종료
       }
+
 
       // 현재 시간으로부터 일주일 후 계산
       const oneWeekLater = new Date(currentTime.getTime() + (7 * 24 * 60 * 60 * 1000));
@@ -87,7 +108,8 @@ import { Product } from '../Type';
       formData.append('auctioncategory', product.auctioncategory);
       formData.append('auctionprice', String(product.auctionprice));
       formData.append('auctionendtime', String(product.auctionendtime));
-      formData.append('auctiondirectbid', isDirectBidSelected ? String(product.auctiondirectbid) : ''); // 변경된 부분
+      formData.append('auctiondirectbid', isDirectBidSelected ? String(product.auctiondirectbid) : '');
+      formData.append('auctionusername', String(session?.user.name));
 
       axios.post("http://localhost:8080/auctionwrite", 
         formData, 
@@ -99,9 +121,11 @@ import { Product } from '../Type';
       .then((res) => {
         console.log(res);
         alert('상품 등록이 완료되었습니다.');
+        router.push('/');
       })
       .catch((err) => {
         console.log(err);
+        alert('상품 등록에 실패했습니다.');
       });
     };
   
@@ -148,6 +172,24 @@ import { Product } from '../Type';
                 <div className="flex flex-col">
                   <label htmlFor="auctiontitle" className="mb-1">상품 이름:</label>
                   <input type="text" id="auctiontitle" name="auctiontitle" value={product.auctiontitle} onChange={handleChange} className="border rounded-md py-2 px-3 focus:outline-none focus:ring focus:border-blue-300" />
+                </div>
+                <div className="flex flex-col">
+                  <label htmlFor="auctiontitle" className="mb-1">카테고리:</label>
+                  <select className="border rounded-md py-1 px-2" id="auctioncategory" name="auctioncategory" value={product.auctioncategory} onChange={handleSelectChange}>
+                    <option value="all" selected>
+                      전체
+                    </option>
+                    <option value="의류">의류</option>
+                    <option value="전자기기">전자기기</option>
+                    <option value="유아">유아</option>
+                    <option value="취미/게임/음반">취미/게임/음반</option>
+                    <option value="스포츠/레저">스포츠/레저</option>
+                    <option value="식품">식품</option>
+                    <option value="주방용품">주방용품</option>
+                    <option value="반려동물">반려동물</option>
+                    <option value="티켓">티켓</option>
+                    <option value="미용">미용</option>
+                  </select>
                 </div>
                 <div className="flex flex-col">
                   <label htmlFor="auctionprice" className="mb-1">경매 시작가:</label>

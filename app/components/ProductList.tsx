@@ -1,51 +1,70 @@
 "use client"
 
+import React from "react";
 import axios from "axios";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import Image from "next/image";
 import { ProductInfo } from "../Type";
+import { useRecoilValue } from "recoil";
+import { CategoryAtom } from "../recoil/RecoilContext";
+import ProductBlock from "./Layout/ProductBlock";
+import { useSession } from "next-auth/react";
 
 
-
-const ProductList = () => {
+const ProductList:React.FC = () => {
     const [products, setProducts] = useState<ProductInfo[]>([]);
+    const selectedCategory = useRecoilValue(CategoryAtom);
+    const {data: session} = useSession();
 
 
     useEffect(() => {
+
         async function fetchAuctions() {
-              await axios.get('http://localhost:8080/auctionread', {
+          if(selectedCategory === "all") {
+            await axios.post('http://localhost:8080/auctionread', {
                 withCredentials: true
               })
               .then((res) => {
                   setProducts(res.data);
-                  console.log(res.data);
               })
               .catch((err) => {
                 console.log(err);
               })
-            }
-          fetchAuctions();
-    }, []);
+          }
+          else {
+            await axios.get('http://localhost:8080/categorysearch', {
+              params: {
+                auctioncategory : selectedCategory
+              },
+              withCredentials: true
+            })
+            .then((res) => {
+              setProducts(res.data);
+            })
+            .catch((err) => {
+              console.log(err);
+            })
+          }
+              
+        }
+        fetchAuctions();
+    }, [selectedCategory]);
 
     return(
-        <div className="grid grid-cols-2 gap-5">
-          {products.map((product) => (
-            <Link href={`/product/${product.auctionid}`} key={product.auctionid} passHref>
-              <div className={`p-4 hover:shadow-lg rounded-lg mt-4 hover:border-t-2 border-t-2 cursor-pointer`} key={product.auctionid} >
-                {product.auctionfirsturl ? 
-                    <div className="flex flex-col justify-center items-center">
-                      <Image src={"http://localhost:8080/" + product.auctionfirsturl} alt='product_image' width={150} height={150}/> 
-                    </div>
-                  : 
-                    <p>이미지 없음</p>
-                }
-                <p className='text-xl font-semibold'>{product.auctiontitle}</p>
-                <p className='text-gray-600'>{product.auctionprice} 원</p>
-                <p className='text-gray-500'>{product.auctionendtime}</p>
+        <div className="mb-96">
+          {products.length === 0 ? 
+              <div className="flex flex-col justify-center items-center pt-12">
+                <p className="font-bold text-xl">등록된 상품이 없습니다.</p>
               </div>
-            </Link>
-          ))}
+            :
+            <div className="grid lg:grid-cols-4 gap-5 sm:grid-cols-2">
+              {products.map((product) => (
+                <Link href={`/product/${product.auctionid}`} key={product.auctionid} passHref>
+                  <ProductBlock product={product} />
+                </Link>
+              ))}
+            </div>
+          }
         </div>
     );
 

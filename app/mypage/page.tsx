@@ -1,4 +1,5 @@
 "use client"
+import axios from "axios";
 import { signIn, useSession } from "next-auth/react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
@@ -8,11 +9,26 @@ const MyPage = () => {
     const {data: session, status: sessionStatus} = useSession();
 
     useEffect(() => {
-      if (sessionStatus === "loading") return; // 세션 로딩 중일 때는 아무것도 하지 않음
+      // if (sessionStatus === "loading") return; // 세션 로딩 중일 때는 아무것도 하지 않음
       if (!session) {
         signIn("naver", { redirect: true });
       }
-    }, [session, sessionStatus]);
+
+      const formData = new FormData();
+      formData.append("user", String(session?.user.email));
+
+
+      axios.post("http://localhost:8080/readuser", formData,
+        {
+        withCredentials: true
+        })
+        .then((res) => {
+        console.log(res);
+        })
+        .catch((err) => {
+        console.log(err);
+        })
+    }, [session]);
 
     const toggleClick = (index: number) => {
         const newToggleStates = [...toggleStates];

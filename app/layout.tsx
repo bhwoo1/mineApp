@@ -4,6 +4,7 @@ import "./globals.css";
 import Providers from "./components/Providers";
 import Navbar from "./components/Layout/NavBar";
 import Footer from "./components/Layout/Footer";
+import RecoilContextProvider from "./recoil/RecoilContext";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -20,11 +21,13 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <Providers>
-          <Navbar />
-          {children}
-          {/* <Footer /> */}
-        </Providers>
+        <RecoilContextProvider>
+          <Providers>
+            <Navbar />
+            {children}
+            <Footer />
+          </Providers>
+        </RecoilContextProvider>
       </body>
     </html>
   );

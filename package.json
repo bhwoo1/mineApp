@@ -12,13 +12,16 @@
     "@prisma/client": "^5.11.0",
     "bcrypt": "^5.1.1",
     "jsonwebtoken": "^9.0.2",
-    "next": "^14.2.0-canary.43",
+    "next": "^14.1.4",
     "next-auth": "^4.24.7",
     "react": "^18",
-    "react-dom": "^18"
+    "react-dom": "^18",
+    "react-icons": "^5.1.0",
+    "recoil": "^0.7.7"
   },
   "devDependencies": {
     "@types/bcrypt": "^5.0.2",
+    "@types/crypto-js": "^4.2.2",
     "@types/jsonwebtoken": "^9.0.6",
     "@types/node": "^20",
     "@types/react": "^18",
