@@ -14,20 +14,21 @@ const MyPage = () => {
         signIn("naver", { redirect: true });
       }
 
+
+
       const formData = new FormData();
       formData.append("user", String(session?.user.email));
 
 
-      axios.post("http://localhost:8080/readuser", formData,
-        {
+      axios.post("http://localhost:8080/readuser", formData, {
         withCredentials: true
-        })
-        .then((res) => {
-        console.log(res);
-        })
-        .catch((err) => {
+      })
+      .then((res) => {
+        console.log(res.data);
+      })
+      .catch((err) => {
         console.log(err);
-        })
+      });
     }, [session]);
 
     const toggleClick = (index: number) => {

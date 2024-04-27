@@ -80,10 +80,6 @@ const EditProduct = (props: {
             }
         }
 
-        const formDataArray = Array.from(formData.entries());
-        for (const pair of formDataArray) {
-            console.log(pair[0], pair[1]);
-        }
         await axios.put(`http://localhost:8080/auctionupdate`, formData, {
             headers: {
                 'Content-Type': 'multipart/form-data'

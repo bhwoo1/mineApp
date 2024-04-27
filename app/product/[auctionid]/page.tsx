@@ -10,6 +10,8 @@ import Link from "next/link";
 import { convertToKoreanTime } from "@/app/AuctionFunctions";
 import { SearchUserAtom } from "@/app/recoil/RecoilContext";
 import { useRecoilState } from "recoil";
+import { FaStar } from "react-icons/fa";
+import { FaRegStar } from "react-icons/fa";
 
 
 const Product = (props: {
@@ -24,9 +26,9 @@ const Product = (props: {
     const router = useRouter();
     const [newBidPrice, setNewBidPrice] = useState(0);
     const [searchUser, setSearchUser] = useRecoilState(SearchUserAtom);
+    const [scrapped, setScrapped] = useState<boolean>(false);
 
     useEffect(() => {
-        console.log(props.params.auctionid);
         async function fetchAuctions() {
             try {
                 const formData = new FormData();
@@ -50,7 +52,37 @@ const Product = (props: {
             }
         }
         fetchAuctions();
-    }, []);
+
+        if(session?.user.email) {
+            const fetchScrap = async () => {
+                    const formData = new FormData();
+                    formData.append("user", String(session?.user.email));
+                    formData.append("auctionid", String(product?.auctionid));
+                    await axios.post("http://localhost:8080/readuser", formData, {
+                        withCredentials: true
+                    })
+                    .then((res) => {
+                        const scrapIds = res.data.scrapids;
+                        scrapIds.forEach((scrapid: string) => {
+                            if (scrapid === String(product?.auctionid)) {
+                                setScrapped(true);
+                            }
+                        });
+                    })
+                    .catch((err) => {
+                        console.log(err);
+                    })
+            };
+            fetchScrap();
+        }
+        else {
+            console.log("작동불가");
+        }
+
+        
+
+        
+    }, [product]);
 
     const productDelete = async () => {
         if(product) {
@@ -158,6 +190,41 @@ const Product = (props: {
 
         };
         
+
+        const reqScrap = () => {
+            const formData = new FormData();
+            formData.append("user", String(session?.user.email));
+            formData.append("auctionid", String(product?.auctionid));
+            axios.post("http://localhost:8080/scrap", formData, {
+                withCredentials: true
+            })
+            .then((res) => {
+                alert("관심목록에 등록했습니다.");
+                setScrapped(true);
+            })
+            .catch((err) => {
+                console.log(err);
+                alert("관심등록에 실패했습니다.")
+            })
+        };
+
+        const reqUnscrap = () => {
+            const formData = new FormData();
+            formData.append("user", String(session?.user.email));
+            formData.append("auctionid", String(product?.auctionid));
+            axios.put("http://localhost:8080/unscrap", formData, {
+                withCredentials: true
+            })
+            .then((res) => {
+                alert("관심목록에서 해제했습니다.");
+                setScrapped(false);
+            })
+            .catch((err) => {
+                console.log(err);
+                alert("관심해제에 실패했습니다.");
+            })
+
+        };
         
 
     
@@ -181,7 +248,19 @@ const Product = (props: {
                                 </div>
                             </div>
                             <div className="mx-auto p-6">
-                                <p className="font-bold text-3xl pb-4">{product?.auctiontitle}</p>
+                                <div className="flex flex-row">
+                                    {product?.auctionuser != session?.user.email && 
+                                        <>
+                                            {scrapped ? 
+                                                    <p className="text-3xl pr-4 cursor-pointer text-yellow-600" onClick={reqUnscrap}><FaStar /></p>
+                                                :
+                                                    <p className="text-3xl pr-4 cursor-pointer" onClick={reqScrap}><FaRegStar /></p>
+                                            }
+                                        </>
+                                        
+                                    }
+                                    <p className="font-bold text-3xl pb-4">{product?.auctiontitle}</p>
+                                </div>
                                 <div className="flex flex-col pb-2">
                                     <div className="flex items-center pb-4">
                                         <p className="font-semibold mr-2">판매자 :</p>
@@ -219,7 +298,17 @@ const Product = (props: {
                                     ) : (
                                         <>
                                             <button className="bg-green-500 hover:bg-green-700 text-white py-2 px-4 rounded-md mr-2" onClick={() => setBidMode(true)}>입찰하기</button>
-                                            <button className="bg-gray-500 hover:bg-gray-700 text-white py-2 px-4 rounded-md mr-2">관심등록</button>
+                                            {product?.auctionuser != session?.user.email && 
+                                                <>
+                                                    {scrapped ? 
+                                                            <button className="bg-gray-500 hover:bg-gray-700 text-white py-2 px-4 rounded-md mr-2" onClick={reqUnscrap}>관심해제</button>
+                                                        :
+                                                            <button className="bg-gray-500 hover:bg-gray-700 text-white py-2 px-4 rounded-md mr-2" onClick={reqScrap}>관심등록</button>
+                                                    }
+                                                </>
+                                                
+                                            }
+                                            
                                             {bidMode &&
                                                 <div className="pt-4">
                                                 <input type="number" id="newBidPrice" name="newBidPrice" value={newBidPrice} onChange={(e) => setNewBidPrice(parseInt(e.target.value, 10))} min={1000} step={100} className="border rounded-md py-2 px-3 focus:outline-none focus:ring focus:border-blue-300" />
