@@ -30,3 +30,13 @@ export type Product =  {
     auctionbidsnum: number,
     auctionbidprice: string
   }
+
+  export type CommentInfo = {
+    boardid: number,
+    commentid: number,
+    content: string,
+    username: string,
+    user: string,
+    datetime: number[],
+    parentcomment: string
+}

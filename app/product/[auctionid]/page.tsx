@@ -12,6 +12,8 @@ import { SearchUserAtom } from "@/app/recoil/RecoilContext";
 import { useRecoilState } from "recoil";
 import { FaStar } from "react-icons/fa";
 import { FaRegStar } from "react-icons/fa";
+import Comment from "@/app/components/Layout/Comment";
+import Countdown from "@/app/components/Countdown";
 
 
 const Product = (props: {
@@ -27,6 +29,7 @@ const Product = (props: {
     const [newBidPrice, setNewBidPrice] = useState(0);
     const [searchUser, setSearchUser] = useRecoilState(SearchUserAtom);
     const [scrapped, setScrapped] = useState<boolean>(false);
+    const [activeAuction, setActiveAuction] = useState<boolean>(true);
 
     useEffect(() => {
         async function fetchAuctions() {
@@ -39,11 +42,16 @@ const Product = (props: {
                 if (res.data) {
                     setProduct(res.data);
                     setSelectedImage(res.data.auctionfirsturl);
-                    setNewBidPrice(res.data.auctionbidprice);
                     setSearchUser({
                         user: res.data.auctionuser,
                         username: res.data.auctionusername
                     });
+                    
+                    const currentTime = new Date();
+                    const auctionEndTime = new Date(res.data.auctionendtime);
+                    if (currentTime > auctionEndTime) {
+                        setActiveAuction(false);
+                    };
                 } else {
                     console.log("서버로부터 데이터를 수신하지 못했습니다");
                 }
@@ -79,7 +87,6 @@ const Product = (props: {
             console.log("작동불가");
         }
 
-        
 
         
     }, [product]);
@@ -91,6 +98,8 @@ const Product = (props: {
                 return;
             }
         }
+
+
         
         await axios.delete('http://localhost:8080/auctiondelete', {
             params: {
@@ -101,6 +110,7 @@ const Product = (props: {
         })
         .then((res) => {
             alert('상품을 삭제하였습니다.');
+            console.log(res.data);
             router.push("/");
         })
         .catch((err) => {
@@ -132,8 +142,16 @@ const Product = (props: {
 
 
         const bidRegist = () => {
+
+
+
             if (!session) {
                 alert('로그인이 필요합니다.');
+                return;
+            }
+
+            if(!activeAuction) {
+                alert('이미 마감된 경매입니다.');
                 return;
             }
 
@@ -248,6 +266,7 @@ const Product = (props: {
                                 </div>
                             </div>
                             <div className="mx-auto p-6">
+                                <Countdown targetDateString={product.auctionendtime} />
                                 <div className="flex flex-row">
                                     {product?.auctionuser != session?.user.email && 
                                         <>
@@ -311,14 +330,11 @@ const Product = (props: {
                                             
                                             {bidMode &&
                                                 <div className="pt-4">
-                                                <input type="number" id="newBidPrice" name="newBidPrice" value={newBidPrice} onChange={(e) => setNewBidPrice(parseInt(e.target.value, 10))} min={1000} step={100} className="border rounded-md py-2 px-3 focus:outline-none focus:ring focus:border-blue-300" />
-                                                <button 
-                                                    className="bg-red-500 hover:bg-red-700 text-white py-2 px-4 rounded-md mr-2 ml-2" 
-                                                    onClick={bidRegist}
-                                                >
-                                                    등록
-                                                </button>
-                                            </div>
+                                                    <input type="number" id="newBidPrice" name="newBidPrice" value={newBidPrice} onChange={(e) => setNewBidPrice(parseInt(e.target.value, 10))} min={1000} step={100} className="border rounded-md py-2 px-3 focus:outline-none focus:ring focus:border-blue-300" />
+                                                    <button 
+                                                        className="bg-red-500 hover:bg-red-700 text-white py-2 px-4 rounded-md mr-2 ml-2" 
+                                                        onClick={bidRegist}>등록</button>
+                                                </div>
                                             }
                                             
                                         </>
@@ -327,18 +343,22 @@ const Product = (props: {
                             </div>
                         </div>
                         <div className="pt-24">
-                        <p className="text-3xl font-bold mb-4 text-center text-gray-800 border-b-2 border-gray-300 pb-2">상세 이미지</p>
-                        <p className="text-gray-700 text-center pb-12">이미지를 클릭하시면 크게 확인할 수 있습니다.</p>
-                            <div className="grid grid-cols-2 gap-4">
-                                {product?.auctionimageurl?.map((image, index) => (
-                                    <div key={index} className="relative w-96 h-96 overflow-hidden" onClick={() => imageClick(image)}>
-                                        <img src={"http://localhost:8080/" + image} alt={`상품 이미지 ${index + 1}`} className="w-full h-full object-cover" />
-                                    </div>
-                                ))}
-                            </div>
+                            <p className="text-3xl font-bold mb-4 text-center text-gray-800 border-b-2 border-gray-300 pb-2">상세 이미지</p>
+                            <p className="text-gray-700 text-center pb-12">이미지를 클릭하시면 크게 확인할 수 있습니다.</p>
+                                <div className="grid grid-cols-2 gap-4">
+                                    {product?.auctionimageurl?.map((image, index) => (
+                                        <div key={index} className="relative w-96 h-96 overflow-hidden" onClick={() => imageClick(image)}>
+                                            <img src={"http://localhost:8080/" + image} alt={`상품 이미지 ${index + 1}`} className="w-full h-full object-cover" />
+                                        </div>
+                                    ))}
+                                </div>
                             <div className="mb-96">
                                 <p className="pt-12 text-3xl font-bold mb-4 text-center text-gray-800 border-b-2 border-gray-300 pb-2">상세 설명</p>
                                 <p>{product?.auctioncontent}</p>
+                            </div>
+                            <div className="mb-96">
+                                <p className="pt-12 text-3xl font-bold mb-4 text-center text-gray-800 border-b-2 border-gray-300 pb-2">Comment</p>
+                                <Comment auctionid={product.auctionid} auctionuser={product.auctionuser} />
                             </div>
                         </div>
                     </div>

@@ -3,13 +3,17 @@ import axios from "axios";
 import { signIn, useSession } from "next-auth/react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
+import MyPageProducts from "../components/MyPageProducts";
 
 const MyPage = () => {
-    const [toggleStates, setToggleStates] = useState<boolean[]>(Array(2).fill(false));
+    const [scrapIds, setScrapIds] = useState<string[]>([]);
+    const [bidIds, setBidIds] = useState<string[]>([]);
+    const [writeIds, setWriteIds] = useState<string[]>([]);
     const {data: session, status: sessionStatus} = useSession();
 
     useEffect(() => {
       // if (sessionStatus === "loading") return; // 세션 로딩 중일 때는 아무것도 하지 않음
+      if (sessionStatus === "loading") return; // 세션 로딩 중일 때는 아무것도 하지 않음
       if (!session) {
         signIn("naver", { redirect: true });
       }
@@ -25,17 +29,14 @@ const MyPage = () => {
       })
       .then((res) => {
         console.log(res.data);
+        setScrapIds(res.data.scrapids);
+        setWriteIds(res.data.writeids);
+        setBidIds(res.data.bidids);
       })
       .catch((err) => {
         console.log(err);
       });
-    }, [session]);
-
-    const toggleClick = (index: number) => {
-        const newToggleStates = [...toggleStates];
-        newToggleStates[index] = !newToggleStates[index];
-        setToggleStates(newToggleStates);
-    };
+    }, []);
 
     
     
@@ -56,12 +57,47 @@ const MyPage = () => {
                   </div>
               </div>
               <div className="pb-12">
-                    <p className="font-bold text-xl cursor-pointer" onClick={() => toggleClick(0)}>내가 주목하는 보물들</p>
-                    <p className={`text-gray-500 ${toggleStates[0] ? "visible" : "invisible"}`}>회원님의 마음에 드는 보물을 관심 등록해보세요!</p>
+                    <p className="font-bold text-xl cursor-pointer" >내가 주목하는 보물들</p>
+                    {scrapIds ? 
+                        <>
+                        {scrapIds.length > 0 ? 
+                            <MyPageProducts ids={scrapIds} />
+                          :
+                          <p className={`text-gray-500`}>회원님의 마음에 드는 보물을 관심 등록해보세요!</p>
+                        }
+                        </>
+                        
+                      :
+                        <p className={`text-gray-500`}>회원님의 마음에 드는 보물을 관심 등록해보세요!</p>
+                    } 
               </div>
               <div className="pb-12">
-                    <p className="font-bold text-xl cursor-pointer" onClick={() => toggleClick(1)}>내가 판매하는 보물들</p>
-                    <p className={`text-gray-500 ${toggleStates[1] ? "visible" : "invisible"}`}>더 이상 필요없는 보물을 판매해보세요!</p>
+                    <p className="font-bold text-xl cursor-pointer" >내가 판매하는 보물들</p>
+                    {writeIds ?
+                      <>
+                        {writeIds.length > 0 ? 
+                            <MyPageProducts ids={writeIds} />
+                          :
+                          <p className={`text-gray-500}`}>더 이상 필요없는 보물을 판매해보세요!</p>
+                        }
+                      </>
+                      :
+                        <p className={`text-gray-500}`}>더 이상 필요없는 보물을 판매해보세요!</p>
+                    }
+              </div>
+              <div className="pb-12">
+                    <p className="font-bold text-xl cursor-pointer" >내가 입찰한 보물들</p>
+                    {bidIds ?
+                        <>
+                        {writeIds.length > 0 ? 
+                            <MyPageProducts ids={bidIds} />
+                          :
+                          <p className={`text-gray-500`}>마음에 드는 보물을 찾으셨나요?</p>
+                        }
+                      </>
+                      :
+                        <p className={`text-gray-500`}>마음에 드는 보물을 찾으셨나요?</p>
+                    }
               </div>
             </div>
           :
