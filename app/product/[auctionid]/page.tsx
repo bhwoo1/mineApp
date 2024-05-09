@@ -33,8 +33,6 @@ const Product = (props: {
     const [isHovered, setIsHovered] = useState(false);
 
     useEffect(() => {
-        
-
         async function fetchAuctions() {
             try {
                 const formData = new FormData();
@@ -60,6 +58,12 @@ const Product = (props: {
             }
         }
         fetchAuctions();
+    }, []);
+
+    useEffect(() => {
+        
+
+        
 
         if(session?.user.email) {
             const fetchScrap = async () => {

@@ -31,7 +31,7 @@ const AuctionList: React.FC = () => {
       } catch (error) {
         console.log(error);
       } finally {
-        setTimeout(() => setLoading(false), 500); // After 5 seconds, set loading to false
+        setTimeout(() => setLoading(false), 200); // After 5 seconds, set loading to false
       }
     }
     fetchAuctions();
