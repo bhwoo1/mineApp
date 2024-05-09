@@ -7,7 +7,7 @@ export type Product =  {
     auctionendtime: Date;
     auctionuser: string;
     auctioncategory: string;
-    auctiondirectbid: number | null;
+    auctiondirectbid: number;
     auctionusername: string;
   }
 
@@ -20,7 +20,7 @@ export type Product =  {
     auctionimageurl: string[],
     auctionprice: string,
     auctiontime:string,
-    auctiondirectbid: number | null,
+    auctiondirectbid: number,
     auctionimage: null,
     auctionbidder: null,
     auctioncategory: string,
@@ -28,7 +28,9 @@ export type Product =  {
     auctionimages: File[],
     auctionusername: string,
     auctionbidsnum: number,
-    auctionbidprice: string
+    auctionbidprice: string,
+    auctioncomplete: boolean,
+    auctionpay: boolean
   }
 
   export type CommentInfo = {

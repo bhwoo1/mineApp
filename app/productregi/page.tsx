@@ -15,7 +15,7 @@ import { Product } from '../Type';
     auctionendtime: new Date(),
     auctionuser: '',
     auctioncategory: '',
-    auctiondirectbid: null,
+    auctiondirectbid: 1000,
     auctionusername: ''
   };
   
@@ -98,17 +98,26 @@ import { Product } from '../Type';
       }
 
 
+      if(isDirectBidSelected && product.auctiondirectbid < product.auctionprice) {
+        alert('즉시입찰가는 시작가격보다 작을 수 없습니다.');
+        return;
+      }
+
+
+      const modifiedContent = product.auctioncontent.replace(/\n/g, "§");
+
+
       const formData = new FormData();
       for (const image of product.auctionimages) {
         formData.append('auctionimages', image);
       }
       formData.append('auctiontitle', product.auctiontitle);
-      formData.append('auctioncontent', product.auctioncontent);
+      formData.append('auctioncontent', modifiedContent);
       formData.append('auctionuser', String(session?.user.email));
       formData.append('auctioncategory', product.auctioncategory);
       formData.append('auctionprice', String(product.auctionprice));
       formData.append('auctionendtime', String(product.auctionendtime));
-      formData.append('auctiondirectbid', isDirectBidSelected ? String(product.auctiondirectbid) : '');
+      formData.append('auctiondirectbid', isDirectBidSelected ? String(product.auctiondirectbid) : String(0));
       formData.append('auctionusername', String(session?.user.name));
 
       axios.post("http://localhost:8080/auctionwrite", 
@@ -201,7 +210,7 @@ import { Product } from '../Type';
                 {isDirectBidSelected && 
                   <div className="flex flex-col">
                     <label htmlFor="auctiondirectbid" className="mb-1">즉시 입찰가:</label>
-                    <input type="number" id="auctiondirectbid" name="auctiondirectbid" value={product.auctionprice} onChange={handleChange} min={1000} step={100} className="border rounded-md py-2 px-3 focus:outline-none focus:ring focus:border-blue-300" />
+                    <input type="number" id="auctiondirectbid" name="auctiondirectbid" value={product.auctiondirectbid} onChange={handleChange} min={1000} step={100} className="border rounded-md py-2 px-3 focus:outline-none focus:ring focus:border-blue-300" />
                   </div>
                 }
                 <div className="flex flex-col">

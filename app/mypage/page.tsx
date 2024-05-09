@@ -89,7 +89,7 @@ const MyPage = () => {
                     <p className="font-bold text-xl cursor-pointer" >내가 입찰한 보물들</p>
                     {bidIds ?
                         <>
-                        {writeIds.length > 0 ? 
+                        {bidIds.length > 0 ? 
                             <MyPageProducts ids={bidIds} />
                           :
                           <p className={`text-gray-500`}>마음에 드는 보물을 찾으셨나요?</p>

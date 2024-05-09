@@ -42,22 +42,22 @@ const Countdown: React.FC<Prop> = (props: Prop) => {
             <div className="flex flex-row">
                 <div className="flex flex-col items-center">
                     <p className="text-3xl font-bold">{times[0]}</p>
-                    <p className="text-sm">Days</p>
+                    <p className="text-sm font-bold">Days</p>
                 </div>
-                <p className="text-4xl mx-2">/</p>
+                <p className="text-4xl mx-2 font-bold">/</p>
                 <div className="flex flex-col items-center">
                     <p className="text-3xl font-bold">{times[1]}</p>
-                    <p className="text-sm">Hours</p>
+                    <p className="text-sm font-bold">Hours</p>
                 </div>
-                <p className="text-4xl mx-2">/</p>
+                <p className="text-4xl mx-2 font-bold">/</p>
                 <div className="flex flex-col items-center">
                     <p className="text-3xl font-bold">{times[2]}</p>
-                    <p className="text-sm">Minutes</p>
+                    <p className="text-sm font-bold">Minutes</p>
                 </div>
-                <p className="text-4xl mx-2">/</p>
+                <p className="text-4xl mx-2 font-bold">/</p>
                 <div className="flex flex-col items-center">
                     <p className="text-3xl font-bold">{times[3]}</p>
-                    <p className="text-sm">Seconds</p>
+                    <p className="text-sm font-bold">Seconds</p>
                 </div>
             </div>
         </div>

@@ -12,28 +12,29 @@ const MyPageProducts = (props: Prop) => {
     const [products, setProducts] = useState<ProductInfo[]>([]);
 
     useEffect(() => {
+        console.log(props.ids);
         if (Array.isArray(props.ids)) {
-        const fetchProducts = async () => {
+            const fetchProducts = async () => {
 
-            // props.ids의 각 요소에 대해 작업을 수행
-            for (const id of props.ids) {
-                const formData = new FormData();
-                formData.append("auctionid", id);
+                // props.ids의 각 요소에 대해 작업을 수행
+                for (const id of props.ids) {
+                    const formData = new FormData();
+                    formData.append("auctionid", id);
 
-                axios.post("http://localhost:8080/auctionboardread", formData, {
-                    withCredentials: true
-                })
-                .then((res) => {
-                    const product = res.data;
-                    setProducts(prevProducts => [...prevProducts, product]);
-                })
-                .catch((err) => {
-                    console.log(err);
-                })
-            }
-        };
+                    axios.post("http://localhost:8080/auctionboardread", formData, {
+                        withCredentials: true
+                    })
+                    .then((res) => {
+                        const product = res.data;
+                        setProducts(prevProducts => [...prevProducts, product]);
+                    })
+                    .catch((err) => {
+                        console.log(err);
+                    })
+                }
+            };
 
-        fetchProducts();
+            fetchProducts();
         }
     }, [props.ids]); // props.ids가 변경될 때마다 useEffect 내의 작업을 수행
 
