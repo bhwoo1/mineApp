@@ -7,7 +7,6 @@ type Prop = {
 
 
 const Countdown: React.FC<Prop> = (props: Prop) => {
-    const [countdown, setCountdown] = useState<string>('');
     const [times, setTimes] = useState<number[]>([0, 0, 0, 0]);
   
     useEffect(() => {
