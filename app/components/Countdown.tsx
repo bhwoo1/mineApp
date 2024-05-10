@@ -10,7 +10,7 @@ const Countdown: React.FC<Prop> = (props: Prop) => {
     const [times, setTimes] = useState<number[]>([0, 0, 0, 0]);
   
     useEffect(() => {
-      const updateCountdown = () => {
+        const updateCountdown = () => {
         const targetDate = new Date(props.targetDateString);
         const currentDate = new Date();
   
