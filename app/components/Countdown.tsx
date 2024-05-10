@@ -11,23 +11,23 @@ const Countdown: React.FC<Prop> = (props: Prop) => {
   
     useEffect(() => {
         const updateCountdown = () => {
-        const targetDate = new Date(props.targetDateString);
-        const currentDate = new Date();
-  
-        const timeDifference = targetDate.getTime() - currentDate.getTime();
-  
-        if (timeDifference <= 0) {
-            setTimes([0, 0, 0, 0]); // 이벤트가 이미 지남
-            return;
-        }
+            const targetDate = new Date(props.targetDateString);
+            const currentDate = new Date();
+    
+            const timeDifference = targetDate.getTime() - currentDate.getTime();
+    
+            if (timeDifference <= 0) {
+                setTimes([0, 0, 0, 0]); // 이벤트가 이미 지남
+                return;
+            }
 
-        const seconds = Math.floor(timeDifference / 1000);
-        const minutes = Math.floor(seconds / 60);
-        const hours = Math.floor(minutes / 60);
-        const days = Math.floor(hours / 24);
+            const seconds = Math.floor(timeDifference / 1000);
+            const minutes = Math.floor(seconds / 60);
+            const hours = Math.floor(minutes / 60);
+            const days = Math.floor(hours / 24);
 
-        // times 상태를 업데이트
-        setTimes([days, hours % 24, minutes % 60, seconds % 60]);
+            // times 상태를 업데이트
+            setTimes([days, hours % 24, minutes % 60, seconds % 60]);
       };
   
       const interval = setInterval(updateCountdown, 1000);
