@@ -11,7 +11,7 @@ const ProductBlock2 = ({ product }: Prop) => {
     const endtime = convertToKoreanTime(String(product?.auctionendtime));
 
     return (
-        <div className="flex border p-4 mt-4 cursor-pointer h-44 w-96 bg-white relative">
+        <div className="flex border p-4 mt-4 cursor-pointer h-52 w-96 bg-white relative">
             {product.auctionfirsturl ? (
                 <div className="border mr-4 w-44 h-full">
                     <Image src={"http://localhost:8080/" + product.auctionfirsturl} alt="product_image" width={200} height={150} />

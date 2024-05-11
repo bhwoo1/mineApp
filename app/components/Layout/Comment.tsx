@@ -16,7 +16,7 @@ const Comment = (props: Props) => {
     const [editComment, setEditComment] = useState<string>("");
     const [replyComment, setReplyComment] = useState<string>("");
     const [replyCommentFor, setReplyCommentFor] = useState<number | null>(null);
-    const [editCommentMode, setEditCommentMode] = useState<number | null>(null); // 수정할 댓글의 ID 상태 추가
+    const [editCommentMode, setEditCommentMode] = useState<number | null>(null);
     const {data: session} = useSession();
 
     useEffect(() => {
