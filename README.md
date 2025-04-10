@@ -13,7 +13,8 @@
       - 사용자들이 상품에 대해 댓글을 남기고 답글을 달 수 있어, 경매에 대한 의견을 자유롭게 교환할 수 있습니다.
 
 ## 사용 기술
-       - Next.js와 TypeScript를 사용하여 안정적이고 효율적인 서버 사이드 렌더링 및 정적 페이지를 생성하였습니다.
-       - Recoil을 사용해 상태 관리를 하였습니다.
-       - 유연하고 빠른 UI 디자인을 위해 Tailwind CSS를 사용하였습니다.
-       - Next-Auth 라이브러리를 이용해 Naver 로그인을 구현하였습니다.
+       - Next.js
+       - TypeScript
+       - Recoil
+       - Tailwind CSS
+       - Next-Auth
